@@ -7,4 +7,5 @@
 ## 3.如果要创建一个包,请使用上面的命名格式
 
 # 正版编译指令:
-g++ Biter.ProgramX-Beta3.cpp J:\rec.res -s -static -O2 -g3 -o Biter.ProgramX.exe -std=c++11 -lshell32 -luser32 
+g++ Biter.ProgramX-Beta3.cpp rec.res -s -static -O2 -g3 -o Biter.ProgramX.exe -std=c++11 -lshell32 -luser32 
+rec.res信息文件请到软件包中下载
