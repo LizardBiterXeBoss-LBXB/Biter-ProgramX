@@ -863,7 +863,7 @@ void shell_loop() {
         }
         else if (cmdline == "Help" || cmdline == "HELP" || cmdline == "help") {
             show_tray_notify(TEXT("Biter.ProgramX-Beta3"), TEXT("Help菜单里有好东西"));
-            std::cout << "[]========帮助========[]\n";
+            std::cout << "[]=========帮助=========[]\n";
             std::cout << " exit          退出程序\n";
             std::cout << " Help          帮助\n";
             std::cout << " clean/clear   清屏\n";
@@ -875,7 +875,8 @@ void shell_loop() {
             std::cout << " ping          连接测试\n";
             std::cout << " todo          TODO列表\n";
             std::cout << " return        返回命令行\n";
-            std::cout << "[]====================[]\n";
+            std::cout << " gamelist      游戏菜单\n";
+            std::cout << "[]======================[]\n";
         }
         else if (cmdline == "clean" || cmdline == "clear") {
             console_clear();
@@ -918,6 +919,9 @@ void shell_loop() {
                     system((cmd+"").c_str());
                 
             }
+        }
+        else if (cmdline == "gamelist") {
+            std::cout << "此功能正在开发" << std::endl;
         }
         else if (cmdline.empty()) {
             continue;
