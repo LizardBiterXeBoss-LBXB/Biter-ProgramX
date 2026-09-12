@@ -30,6 +30,7 @@ public:
     static constexpr unsigned long long LOGIN_ERROR = 0x000000000000004F;
     static constexpr unsigned long long LOGIN_ERROR_NAME_CAN_NOT_FALL_TO_THE_PROGRAM = 0x000000000000002F;
     static constexpr unsigned long long REGISTER_ERROR = 0x000000000000006F;
+    static constexpr unsigned long long START_ERROR = 0x00000000000003F3;
 };
 
 const std::string YOU = "You>";
@@ -54,7 +55,7 @@ class sv_game {
         {"meat", 0},
         {"fish", 0},
         {"grass", 0},
-        {"leather", 0}   // 新增，支持 kill 中的皮革
+        {"leather", 0}
     };
 public:
     void set(std::string name, int var);
@@ -946,10 +947,10 @@ void notepad(void) {
 void about(void) {
     console_clear();
     std::cout << "[]==================== 关于 ====================[]\n";
-    std::cout << "Biter.ProgramX-Beta3\n";
+    std::cout << "Biter.ProgramX-Beta5\n";
     std::cout << "开发者: ZengLizard\n";
-    std::cout << "版本:" << "Beta3\n";
-    std::cout << "发布日期: 2024-06-01\n";
+    std::cout << "版本:" << "Beta5\n";
+    std::cout << "发布日期: 2024-09-05\n";
     std::cout << "[]==============================================[]\n";
     std::cout << "\n按下Enter键退出";
     std::cin.get();
@@ -1111,7 +1112,7 @@ public:
         std::cout << "#       #    #  #      #  #  # #\n";
         std::cout << "#       #    #  #   #  #  #   ##\n";
         std::cout << "######  ######  #####  #  #    #\n";
-        std::cout << "        LizardBiterXe CO.       \n";
+        std::cout << "     LizardBiterXeStudio CO.    \n";
     }
 
     void prompt_return_console() {
@@ -1157,6 +1158,7 @@ public:
     }
 
     void register_user(const std::wstring& user_data_filepath, std::string& out_user) {
+    	ErrorDefine ed;
         print_logo();
         std::string username;
         std::cout << "请输入用户名:";
@@ -1164,8 +1166,8 @@ public:
 
         FILE* fout = _wfopen(user_data_filepath.c_str(), L"w");
         if (!fout) {
-            // 修复：使用 ErrorDefine::REGISTER_ERROR
-            throw std::runtime_error(std::to_string(ErrorDefine::REGISTER_ERROR));
+            
+            throw std::runtime_error(std::to_string(ed.REGISTER_ERROR));
         }
         fputs(username.c_str(), fout);
         fputc('\n', fout);
@@ -1215,111 +1217,125 @@ public:
         }
     }
 };
+class ShellFunction {
+    //define
+    int open_program(std::string path) {
+		int runtime_status = system(path.c_str());
+        return runtime_status;
+	}
+public:
+    // ---------- Shell 主循环 ----------
+    void shell_loop() {
+        console_clear();
+        std::cout << "#     # #####   ###  #####  ####  \n"
+            << "#         #    #   # #   #  #   #\n"
+            << "#     #  #     ##### #####  #   #\n"
+            << "#     # #      #   # #  #   #   #\n"
+            << "##### # #####  #   # #   #  #### \n";
+        std::cout << "        LizardBiterXe CO.       \n";
+        std::cout << "[]============Shell===========[]\n";
+        std::cout << "输入Help或HELP可以获得部分指令使用方法\n";
+        std::cout << "检测到你正在使用开发者版本(预览版),有些功能尚未开发完全\n\n";
 
-// ---------- Shell 主循环 ----------
-void shell_loop() {
-    console_clear();
-    std::cout << "#     # #####   ###  #####  ####  \n"
-        << "#         #    #   # #   #  #   #\n"
-        << "#     #  #     ##### #####  #   #\n"
-        << "#     # #      #   # #  #   #   #\n"
-        << "##### # #####  #   # #   #  #### \n";
-    std::cout << "        LizardBiterXe CO.       \n";
-    std::cout << "[]============Shell===========[]\n";
-    std::cout << "输入Help或HELP可以获得部分指令使用方法\n";
-    std::cout << "检测到你正在使用开发者版本(预览版),有些功能尚未开发完全\n\n";
+        while (!g_app.is_exit) {
+            std::string prompt = g_app.current_user + ":";
+            std::cout << prompt;
+            std::string cmdline;
+            if (!std::getline(std::cin, cmdline)) {
+                break;
+            }
 
-    while (!g_app.is_exit) {
-        std::string prompt = g_app.current_user + ":";
-        std::cout << prompt;
-        std::string cmdline;
-        if (!std::getline(std::cin, cmdline)) {
-            break;
-        }
-
-        if (cmdline == "exit") {
-            show_tray_notify(TEXT("Biter.ProgramX-Beta3"), TEXT("感谢使用Biter ProgramX"));
-            g_app.is_exit = true;
-        }
-        else if (cmdline == "Help" || cmdline == "HELP" || cmdline == "help") {
-            show_tray_notify(TEXT("Biter.ProgramX-Beta3"), TEXT("Help菜单里有好东西"));
-            std::cout << "[]=========帮助=========[]\n";
-            std::cout << " exit          退出程序\n";
-            std::cout << " Help          帮助\n";
-            std::cout << " clean/clear   清屏\n";
-            std::cout << " notepad       记事本\n";
-            std::cout << " calendar      日历\n";
-            std::cout << " clock/time    时钟\n";
-            std::cout << " about         关于\n";
-            std::cout << " calc          计算器\n";
-            std::cout << " ping          连接测试\n";
-            std::cout << " todo          TODO列表\n";
-            std::cout << " return        返回命令行\n";
-            std::cout << " gamelist      游戏菜单\n";
-            std::cout << "[]======================[]\n";
-        }
-        else if (cmdline == "clean" || cmdline == "clear") {
-            console_clear();
-        }
-        else if (cmdline == "notepad") {
-            notepad();
-        }
-        else if (cmdline == "calendar") {
-            SimpleCalendar();
-        }
-        else if (cmdline == "clock" || cmdline == "time") {
-            TimeClock();
-        }
-        else if (cmdline == "about") {
-            about();
-        }
-        else if (cmdline == "calc") {
-            Calc();
-        }
-        else if (cmdline == "ping") {
-            std::string ip;
-            std::cout << "PingIP:";
-            std::getline(std::cin, ip);
-            if (!ip.empty())
-                system(("ping " + ip).c_str());
-            else
-                std::cout << "IP地址不能为空。\n";
-        }
-        else if (cmdline == "todo") {
-            TodoList todo;
-            todo.interactive_menu();
-        }
-        else if (cmdline == "return") {
-            std::cout << "输入系统命令，输入 END 退出\n";
-            std::string cmd;
-            while (true) {
-                std::cout << "CMD> ";
-                if (!std::getline(std::cin, cmd)) break;
-                if (cmd == "END") break;
-                if (!cmd.empty())
-                    system(cmd.c_str());
+            if (cmdline == "exit") {
+                show_tray_notify(TEXT("Biter.ProgramX-Beta3"), TEXT("感谢使用Biter ProgramX"));
+                g_app.is_exit = true;
+            }
+            else if (cmdline == "Help" || cmdline == "HELP" || cmdline == "help") {
+                show_tray_notify(TEXT("Biter.ProgramX-Beta3"), TEXT("Help菜单里有好东西"));
+                std::cout << "[]=========帮助=========[]\n";
+                std::cout << " exit          退出程序\n";
+                std::cout << " Help          帮助\n";
+                std::cout << " clean/clear   清屏\n";
+                std::cout << " notepad       记事本\n";
+                std::cout << " calendar      日历\n";
+                std::cout << " clock/time    时钟\n";
+                std::cout << " about         关于\n";
+                std::cout << " calc          计算器\n";
+                std::cout << " ping          连接测试\n";
+                std::cout << " todo          TODO列表\n";
+                std::cout << " return        返回命令行\n";
+                std::cout << " gamelist      游戏菜单\n";
+                std::cout << "[]======================[]\n";
+            }
+            else if (cmdline == "clean" || cmdline == "clear") {
+                console_clear();
+            }
+            else if (cmdline == "notepad") {
+                notepad();
+            }
+            else if (cmdline == "calendar") {
+                SimpleCalendar();
+            }
+            else if (cmdline == "clock" || cmdline == "time") {
+                TimeClock();
+            }
+            else if (cmdline == "about") {
+                about();
+            }
+            else if (cmdline == "calc") {
+                Calc();
+            }
+            else if (cmdline == "ping") {
+                std::string ip;
+                std::cout << "PingIP:";
+                std::getline(std::cin, ip);
+                if (!ip.empty())
+                    system(("ping " + ip).c_str());
+                else
+                    std::cout << "IP地址不能为空。\n";
+            }
+            else if (cmdline == "todo") {
+                TodoList todo;
+                todo.interactive_menu();
+            }
+            else if (cmdline == "return") {
+                std::cout << "输入系统命令，输入 END 退出\n";
+                std::string cmd;
+                while (true) {
+                    std::cout << "CMD> ";
+                    if (!std::getline(std::cin, cmd)) break;
+                    if (cmd == "END") break;
+                    if (!cmd.empty())
+                        system(cmd.c_str());
+                }
+            }
+            else if (cmdline == "open") {
+                std::string path;
+                std::cin >> path;
+                this->open_program(path);
+                std::cout << "输出的数字代表运行状态" << std::endl;
+            }
+            else if (cmdline == "gamelist") {
+                gamelist gl;
+                gl.chooser();
+            }
+            else if (cmdline.empty()) {
+                continue;
+            }
+            else {
+                std::cerr << "未知指令,看看help\n";
             }
         }
-        else if (cmdline == "gamelist") {
-            gamelist gl;
-            gl.chooser();
-        }
-        else if (cmdline.empty()) {
-            continue;
-        }
-        else {
-            std::cerr << "未知指令,看看help\n";
-        }
     }
-}
+
+
+};
 
 static void title(std::string title) {
     system(("title " + title).c_str());
 }
 
 LoginFunction logfunc;
-
-// ==================== 主函数 ====================
+ShellFunction shlfunc;
 int main() {
     g_app.exe_dir = get_exe_directory();
     g_app.data_dir = g_app.exe_dir + L"BiterData\\";
@@ -1330,7 +1346,7 @@ int main() {
         MessageBox(NULL, TEXT("托盘组件初始化失败"), TEXT("警告"), MB_OK | MB_ICONWARNING);
     }
     else {
-        show_tray_notify(TEXT("Biter.ProgramX-Beta3"), TEXT("HI~欢迎使用Biter ProgramX"));
+        show_tray_notify(TEXT("Biter.ProgramX-Beta5"), TEXT("HI~欢迎使用Biter ProgramX"));
     }
 
     logfunc.prompt_return_console();
@@ -1341,8 +1357,9 @@ int main() {
     title("loging...");
     logfunc.choose_login_or_register(user_file);
     title("SHELL");
-    shell_loop();
-
+    show_tray_notify(TEXT("Biter.ProgramX-Beta5"), TEXT("成功进入Shell\n开始使用吧!"));
+    shlfunc.shell_loop();
+    
     cleanup_tray();
     return 0;
 }
