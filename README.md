@@ -27,7 +27,7 @@ Biter.ProgramX 是一款轻量级的 Windows 命令行实用工具，设计初�
 | 待办事项列表 | 添加、删除、标记完成，数据持久化存储 |
 | 系统托盘通知 | 程序启动和退出时显示气泡提示 |
 | 用户登录/注册 | 单用户演示，用户名保存在本地文件 |
-| 帮助系统 | 输入 `Help` 或 `help` 查看所有命令 |
+| 帮助系统 | 输入 `帮助` 或 `help` 查看所有命令 |
 | 清屏、退出、关于信息 | 常用辅助命令 |
 
 ### 🛠️ 编译与运行
@@ -39,9 +39,9 @@ Biter.ProgramX 是一款轻量级的 Windows 命令行实用工具，设计初�
 
 #### 编译命令（官方推荐）
 ```bash
-g++ Biter.ProgramX-Beta3.cpp rec.res -s -static -O2 -g3 -o Biter.ProgramX.exe -std=c++11 -lshell32 -luser32 -lgdi32 -ladvapi32
+g++ Biter.ProgramX-Beta5.cpp runner.o rec.res -s -static -O2 -g3 -o Biter.ProgramX.exe -std=c++11 -lshell32 -luser32 
 
-注意：rec.res 文件请从本仓库的 Release 中下载，或使用 windres 编译根目录下的 Biter.ProgramX.rc 文件自行生成。
+注意：rec.res和runner.o 文件请从本仓库的 Release 中下载，或使用 windres 编译根目录下的 Biter.ProgramX.rc 文件自行生成。
 
 🤝 贡献与反馈
 欢迎提交 Issue 和 Pull Request。
@@ -68,7 +68,7 @@ Help system	Type Help or help to list all commands
 Clear screen, exit, about	Common auxiliary commands
 🛠️ Build & Run
 Prerequisites
-Windows OS (XP or later)
+Windows OS (7 or later)
 
 MinGW‑w64 or MSVC (g++ recommended)
 
@@ -76,8 +76,8 @@ Resource file rec.res (contains program icon and version info)
 
 Build Command (Official)
 bash
-g++ Biter.ProgramX-Beta3.cpp rec.res -s -static -O2 -g3 -o Biter.ProgramX.exe -std=c++11 -lshell32 -luser32 -lgdi32 -ladvapi32
-Note: Download rec.res from the Releases section of this repo, or generate it yourself using windres with the provided Biter.ProgramX.rc file.
+g++ Biter.ProgramX-Beta5.cpp runner.o rec.res -s -static -O2 -g3 -o Biter.ProgramX.exe -std=c++11 -lshell32 -luser32 
+Note: Download rec.res and runner.o from the Releases section of this repo, or generate it yourself using windres with the provided Biter.ProgramX.rc file.
 
 Run
 Double‑click Biter.ProgramX.exe. On first use, choose “Register” and enter a username. After that, log in and you will enter the Shell environment. Type help to see all available commands.
