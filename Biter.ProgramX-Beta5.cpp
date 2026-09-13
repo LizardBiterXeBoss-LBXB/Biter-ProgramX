@@ -25,6 +25,11 @@
 #define MAX_INPUT_BUFFER 8192
 #define WM_TRAY_MSG     (WM_USER + 100)
 
+// ---------- 前向声明 cajn 运行时入口 ----------
+namespace cajn {
+    int run_bytecode_file(const std::string& cjb_path);
+}
+
 class ErrorDefine {
 public:
     static constexpr unsigned long long LOGIN_ERROR = 0x000000000000004F;
@@ -489,6 +494,74 @@ std::vector<std::string> split(const std::string& s, char delim) {
     return tokens;
 }
 
+// ==================== 插件列表工具 ====================
+static const char* PLUGIN_LIST_FILE = ".\\BiterData\\expenders_path.data";
+
+// 读取插件路径列表（每行一个）
+std::vector<std::string> load_plugin_paths() {
+    std::vector<std::string> paths;
+    std::ifstream in(PLUGIN_LIST_FILE);
+    if (!in.is_open()) return paths;
+    std::string line;
+    while (std::getline(in, line)) {
+        line = trim(line);
+        if (!line.empty()) paths.push_back(line);
+    }
+    in.close();
+    return paths;
+}
+
+// 覆盖写入插件路径列表
+bool save_plugin_paths(const std::vector<std::string>& paths) {
+    std::ofstream out(PLUGIN_LIST_FILE, std::ios::trunc);
+    if (!out.is_open()) return false;
+    for (size_t i = 0; i < paths.size(); ++i)
+        out << paths[i] << '\n';
+    out.close();
+    return true;
+}
+
+// 添加插件路径（去重）
+bool add_plugin_path(const std::string& path) {
+    if (path.empty()) return false;
+    std::vector<std::string> paths = load_plugin_paths();
+    for (size_t i = 0; i < paths.size(); ++i) {
+        if (paths[i] == path) {
+            std::cout << "该插件已在列表中\n";
+            return false;
+        }
+    }
+    paths.push_back(path);
+    if (save_plugin_paths(paths)) {
+        std::cout << "插件已添加\n";
+        return true;
+    }
+    std::cout << "保存失败\n";
+    return false;
+}
+
+// 删除插件路径
+bool remove_plugin_path(const std::string& path) {
+    std::vector<std::string> paths = load_plugin_paths();
+    std::vector<std::string> kept;
+    bool removed = false;
+    for (size_t i = 0; i < paths.size(); ++i) {
+        if (paths[i] == path) { removed = true; continue; }
+        kept.push_back(paths[i]);
+    }
+    if (!removed) {
+        std::cout << "未找到该插件\n";
+        return false;
+    }
+    if (save_plugin_paths(kept)) {
+        std::cout << "插件已删除\n";
+        return true;
+    }
+    std::cout << "保存失败\n";
+    return false;
+}
+
+// ==================== 加密 / 输入辅助 ====================
 std::string sha256(const std::string& input) {
     HCRYPTPROV hProv = 0;
     HCRYPTHASH hHash = 0;
@@ -1158,7 +1231,7 @@ public:
     }
 
     void register_user(const std::wstring& user_data_filepath, std::string& out_user) {
-    	ErrorDefine ed;
+        ErrorDefine ed;
         print_logo();
         std::string username;
         std::cout << "请输入用户名:";
@@ -1166,7 +1239,7 @@ public:
 
         FILE* fout = _wfopen(user_data_filepath.c_str(), L"w");
         if (!fout) {
-            
+
             throw std::runtime_error(std::to_string(ed.REGISTER_ERROR));
         }
         fputs(username.c_str(), fout);
@@ -1217,12 +1290,13 @@ public:
         }
     }
 };
+
 class ShellFunction {
     //define
     int open_program(std::string path) {
-		int runtime_status = system(path.c_str());
+        int runtime_status = system(path.c_str());
         return runtime_status;
-	}
+    }
 public:
     // ---------- Shell 主循环 ----------
     void shell_loop() {
@@ -1264,6 +1338,7 @@ public:
                 std::cout << " todo          TODO列表\n";
                 std::cout << " return        返回命令行\n";
                 std::cout << " gamelist      游戏菜单\n";
+                std::cout << " expend        插件中心\n";
                 std::cout << "[]======================[]\n";
             }
             else if (cmdline == "clean" || cmdline == "clear") {
@@ -1283,6 +1358,48 @@ public:
             }
             else if (cmdline == "calc") {
                 Calc();
+            }
+            else if (cmdline == "expend") {
+                std::cout << "[]=========插件功能=========[]\n";
+                std::cout << "1.打开插件(.cjb) 2.查看插件列表\n";
+                std::cout << "3.删除插件 4.添加插件(.cjb)\n";
+                int tmp;
+                std::cin >> tmp;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                if (tmp == 1) {
+                    std::string path;
+                    std::cout << "输入插件路径: ";
+                    std::getline(std::cin, path);
+                    cajn::run_bytecode_file(path);
+                }
+                else if (tmp == 2) {
+                    std::vector<std::string> paths = load_plugin_paths();
+                    if (paths.empty()) {
+                        std::cout << "（没有已注册插件）\n";
+                    }
+                    else {
+                        std::cout << "已注册插件:\n";
+                        for (size_t i = 0; i < paths.size(); ++i) {
+                            std::cout << "  " << (i + 1) << ". " << paths[i] << "\n";
+                        }
+                    }
+                }
+                else if (tmp == 3) {
+                    std::string path;
+                    std::cout << "输入插件路径: ";
+                    std::getline(std::cin, path);
+                    remove_plugin_path(path);
+                }
+                else if (tmp == 4) {
+                    std::string path;
+                    std::cout << "输入插件路径: ";
+                    std::getline(std::cin, path);
+                    add_plugin_path(path);
+                }
+                else {
+                    std::cout << "无效选项\n";
+                }
             }
             else if (cmdline == "ping") {
                 std::string ip;
@@ -1358,8 +1475,16 @@ int main() {
     logfunc.choose_login_or_register(user_file);
     title("SHELL");
     show_tray_notify(TEXT("Biter.ProgramX-Beta5"), TEXT("成功进入Shell\n开始使用吧!"));
+
+    // 自动加载并运行所有已注册插件
+    std::vector<std::string> auto_paths = load_plugin_paths();
+    for (size_t i = 0; i < auto_paths.size(); ++i) {
+        std::cout << "[auto] 运行插件: " << auto_paths[i] << "\n";
+        cajn::run_bytecode_file(auto_paths[i]);
+    }
+
     shlfunc.shell_loop();
-    
+
     cleanup_tray();
     return 0;
 }
