@@ -39,7 +39,7 @@ Biter.ProgramX 是一款轻量级的 Windows 命令行实用工具，设计初�
 
 #### 编译命令（官方推荐）
 ```bash
-g++ Biter.ProgramX-v1.cpp runner.o J:\rec.res -s -static -O2 -g3 -o Biter.ProgramX.exe -std=c++11 -lshell32 -luser32 -lwinhttp
+g++ Biter.ProgramX-版本.cpp runner.o J:\rec.res -s -static -O2 -g3 -o Biter.ProgramX.exe -std=c++11 -lshell32 -luser32 -lwinhttp
 
 注意：rec.res和runner.o 文件请从本仓库的 Release 中下载，或使用 windres 编译根目录下的 Biter.ProgramX.rc 文件自行生成。
 
